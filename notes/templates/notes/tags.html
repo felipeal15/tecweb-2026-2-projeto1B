@@ -1,0 +1,32 @@
+{% extends "notes/base.html" %}
+
+{% block title %}Tags{% endblock %}
+
+{% block content %}
+{% if tags %}
+<table class="tags-table">
+  <thead>
+    <tr>
+      <th>Tag</th>
+      <th>Anotações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for tag in tags %}
+    <tr>
+      <td>
+        <a href="{% url 'tag_detail' tag.id %}">#{{ tag.name }}</a>
+      </td>
+      <td>
+        <a href="{% url 'tag_detail' tag.id %}" title="Ver anotações de #{{ tag.name }}">
+          &#128279; {{ tag.total }}
+        </a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="card-vazio">Nenhuma tag ainda. Adicione uma ao criar uma anotação!</p>
+{% endif %}
+{% endblock %}

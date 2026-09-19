@@ -1,0 +1,18 @@
+{% extends "notes/base.html" %}
+
+{% block title %}#{{ tag.name }}{% endblock %}
+
+{% block content %}
+<div class="page-heading">
+  <h2 class="page-title">#{{ tag.name }}</h2>
+  <a class="page-back" href="{% url 'tags' %}">&larr; Todas as tags</a>
+</div>
+
+<div class="card-container">
+  {% for note in notes %}
+  {% include "notes/components/note_card.html" with acoes=False %}
+  {% empty %}
+  <p class="card-vazio">Nenhuma anotação com esta tag.</p>
+  {% endfor %}
+</div>
+{% endblock %}

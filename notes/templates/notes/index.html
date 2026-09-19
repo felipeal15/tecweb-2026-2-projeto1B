@@ -18,24 +18,19 @@
     name="detalhes"
     placeholder="Digite o conteúdo..."
   >{{ detalhes }}</textarea>
+  <input
+    class="form-card-tag"
+    type="text"
+    name="tag"
+    placeholder="Adicione uma tag"
+    value="{{ tag }}"
+  />
   <button class="btn" type="submit">Criar</button>
 </form>
 
 <div class="card-container">
   {% for note in notes %}
-  <div class="card" data-id="{{ note.id }}">
-    <h3 class="card-title">{{ note.title }}</h3>
-    <div class="card-content">
-      <p>{{ note.content|linebreaksbr }}</p>
-    </div>
-    <div class="card-actions">
-      <a class="card-action" href="{% url 'update' note.id %}" title="Editar">&#9998;</a>
-      <form method="post" action="{% url 'delete' note.id %}">
-        {% csrf_token %}
-        <button class="card-action" type="submit" title="Apagar">&#128465;</button>
-      </form>
-    </div>
-  </div>
+  {% include "notes/components/note_card.html" with acoes=True %}
   {% empty %}
   <p class="card-vazio">Nenhuma anotação ainda. Escreva a primeira!</p>
   {% endfor %}

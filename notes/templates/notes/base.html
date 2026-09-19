@@ -25,6 +25,10 @@
         <img src="{% static 'notes/img/logo-getit.png' %}" class="logo" alt="Get-it" />
       </a>
       <span class="subtitle">Como o Post-it, mas com outro verbo</span>
+      <nav class="appbar-nav">
+        <a class="appbar-link" href="{% url 'index' %}">Anotações</a>
+        <a class="appbar-link" href="{% url 'tags' %}">Tags</a>
+      </nav>
     </div>
 
     <main class="container">

@@ -21,6 +21,13 @@
     name="detalhes"
     placeholder="Digite o conteúdo..."
   >{{ detalhes }}</textarea>
+  <input
+    class="form-card-tag"
+    type="text"
+    name="tag"
+    placeholder="Adicione uma tag"
+    value="{{ tag }}"
+  />
   <div class="form-actions">
     <!-- Cancelar é só um link: faz GET / e nada é salvo -->
     <a class="btn btn-secondary" href="{% url 'index' %}">Cancelar</a>

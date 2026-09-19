@@ -509,3 +509,116 @@ a {
   width: auto;
   padding: 10px 28px;
 }
+
+/* ==========================================================================
+   Projeto 1B — tags
+   ========================================================================== */
+
+/* --- Links do topo (Anotações / Tags) --- */
+
+.appbar-nav {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  padding-right: 12px;
+}
+
+.appbar-link {
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 15px;
+  color: #2c2c2c;
+  transition: background-color 0.2s;
+}
+
+.appbar-link:hover,
+.appbar-link:focus {
+  background-color: rgba(0, 0, 0, 0.08);
+  outline: none;
+}
+
+/* --- Campo de tag nos formulários --- */
+
+.form-card-tag {
+  padding: 0;
+  border: none;
+  outline: none;
+
+  font-family: "Roboto", sans-serif;
+  font-size: 17px;
+  color: #4c4c4c;
+}
+
+/* --- Tag dentro do card --- */
+
+.card-tag {
+  margin-right: auto;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background-color: #f7d736;
+  font-family: "Permanent Marker", cursive;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+  transition: background-color 0.2s;
+}
+
+.card-tag:hover,
+.card-tag:focus {
+  background-color: #e0af26;
+  outline: none;
+}
+
+/* --- Lista de tags --- */
+
+.tags-table {
+  width: 100%;
+  border: 1px solid #e2e2e2;
+  border-collapse: collapse;
+  background-color: #f7f7f7;
+  text-align: center;
+}
+
+.tags-table th {
+  padding: 12px;
+  border-bottom: 1px solid #e2e2e2;
+  font-size: 14px;
+  font-weight: normal;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.tags-table td {
+  padding: 12px;
+  border-top: 1px solid #e2e2e2;
+  font-size: 17px;
+}
+
+.tags-table a:hover,
+.tags-table a:focus {
+  text-decoration: underline;
+}
+
+/* --- Cabeçalho da página de uma tag --- */
+
+.page-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 40px;
+}
+
+.page-title {
+  font-family: "Permanent Marker", cursive;
+  font-size: 32px;
+}
+
+.page-back {
+  font-size: 15px;
+  color: #4c4c4c;
+}
+
+.page-back:hover,
+.page-back:focus {
+  text-decoration: underline;
+}

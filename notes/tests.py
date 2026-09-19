@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Note
+from .models import Note, Tag
 
 
 class CrudTests(TestCase):
@@ -52,3 +52,76 @@ class CrudTests(TestCase):
     def test_anotacao_inexistente_da_404(self):
         self.assertEqual(self.client.get(reverse('update', args=[999])).status_code, 404)
         self.assertEqual(self.client.post(reverse('delete', args=[999])).status_code, 404)
+
+
+class TagTests(TestCase):
+    def criar(self, titulo, tag):
+        return self.client.post(reverse('index'), {'titulo': titulo, 'detalhes': 'texto', 'tag': tag})
+
+    def test_cria_anotacao_com_tag(self):
+        self.criar('Miojo', 'comida')
+        note = Note.objects.get(title='Miojo')
+        self.assertEqual(note.tag.name, 'comida')
+
+    def test_cria_anotacao_sem_tag(self):
+        self.criar('Sem tag', '')
+        self.assertIsNone(Note.objects.get(title='Sem tag').tag)
+        self.assertEqual(Tag.objects.count(), 0)
+
+    def test_nao_duplica_tags(self):
+        self.criar('Miojo', 'comida')
+        self.criar('Pão doce', '#Comida ')
+        self.assertEqual(Tag.objects.count(), 1)
+        self.assertEqual(Tag.objects.get().notes.count(), 2)
+
+    def test_edita_tag_da_anotacao(self):
+        self.criar('Miojo', 'comida')
+        note = Note.objects.get()
+        response = self.client.get(reverse('update', args=[note.id]))
+        self.assertContains(response, 'value="comida"')
+
+        self.client.post(reverse('update', args=[note.id]), {'titulo': 'Miojo', 'detalhes': 'texto', 'tag': 'receita'})
+        note.refresh_from_db()
+        self.assertEqual(note.tag.name, 'receita')
+        # "comida" ficou sem anotações e foi removida
+        self.assertFalse(Tag.objects.filter(name='comida').exists())
+
+    def test_remove_tag_da_anotacao(self):
+        self.criar('Miojo', 'comida')
+        note = Note.objects.get()
+        self.client.post(reverse('update', args=[note.id]), {'titulo': 'Miojo', 'detalhes': 'texto', 'tag': ''})
+        note.refresh_from_db()
+        self.assertIsNone(note.tag)
+
+    def test_apagar_anotacao_nao_apaga_tag_em_uso(self):
+        self.criar('Miojo', 'comida')
+        self.criar('Pão doce', 'comida')
+        self.client.post(reverse('delete', args=[Note.objects.get(title='Miojo').id]))
+        self.assertTrue(Tag.objects.filter(name='comida').exists())
+
+    def test_lista_de_tags(self):
+        self.criar('Miojo', 'comida')
+        self.criar('Simpsons', 'tv')
+        response = self.client.get('/tags/')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '#comida')
+        self.assertContains(response, '#tv')
+        self.assertContains(response, reverse('tag_detail', args=[Tag.objects.get(name='tv').id]))
+
+    def test_pagina_da_tag_mostra_so_suas_anotacoes(self):
+        self.criar('Miojo', 'comida')
+        self.criar('Simpsons', 'tv')
+        tag = Tag.objects.get(name='comida')
+        response = self.client.get(f'/tags/{tag.id}/')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Miojo')
+        self.assertNotContains(response, 'Simpsons')
+
+    def test_tag_inexistente_da_404(self):
+        self.assertEqual(self.client.get('/tags/999/').status_code, 404)
+
+    def test_pagina_inicial_tem_link_para_tags(self):
+        self.criar('Miojo', 'comida')
+        response = self.client.get(reverse('index'))
+        self.assertContains(response, 'href="/tags/"')
+        self.assertContains(response, '#comida')
