@@ -1,21 +1,43 @@
 {% extends "notes/base.html" %}
-{% load static %}
 
 {% block content %}
-<img src="{% static 'notes/img/logo-getit.png' %}" />
-<p>Como o Post-it, mas com outro verbo</p>
-
-<form method="post">
-  <label for="titulo">Título</label>
-  <input id="titulo" type="text" name="titulo" />
-  <label for="detalhes">Detalhes</label>
-  <textarea id="detalhes" name="detalhes"></textarea>
-  <input type="submit" />
+<form class="form-card" method="post" action="{% url 'index' %}">
+  {% csrf_token %}
+  {% if erro %}
+  <p class="form-error">{{ erro }}</p>
+  {% endif %}
+  <input
+    class="form-card-title"
+    type="text"
+    name="titulo"
+    placeholder="Título"
+    value="{{ titulo }}"
+  />
+  <textarea
+    class="autoresize"
+    name="detalhes"
+    placeholder="Digite o conteúdo..."
+  >{{ detalhes }}</textarea>
+  <button class="btn" type="submit">Criar</button>
 </form>
 
-<ul>
+<div class="card-container">
   {% for note in notes %}
-  <li>{{ note.title }}</li>
+  <div class="card" data-id="{{ note.id }}">
+    <h3 class="card-title">{{ note.title }}</h3>
+    <div class="card-content">
+      <p>{{ note.content|linebreaksbr }}</p>
+    </div>
+    <div class="card-actions">
+      <a class="card-action" href="{% url 'update' note.id %}" title="Editar">&#9998;</a>
+      <form method="post" action="{% url 'delete' note.id %}">
+        {% csrf_token %}
+        <button class="card-action" type="submit" title="Apagar">&#128465;</button>
+      </form>
+    </div>
+  </div>
+  {% empty %}
+  <p class="card-vazio">Nenhuma anotação ainda. Escreva a primeira!</p>
   {% endfor %}
-</ul>
+</div>
 {% endblock %}

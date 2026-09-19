@@ -1,0 +1,30 @@
+{% extends "notes/base.html" %}
+
+{% block title %}Editando anotação{% endblock %}
+
+{% block content %}
+<form class="form-card" method="post" action="{% url 'update' note.id %}">
+  {% csrf_token %}
+  <h2 class="form-card-heading">Editar anotação</h2>
+  {% if erro %}
+  <p class="form-error">{{ erro }}</p>
+  {% endif %}
+  <input
+    class="form-card-title"
+    type="text"
+    name="titulo"
+    placeholder="Título"
+    value="{{ titulo }}"
+  />
+  <textarea
+    class="autoresize"
+    name="detalhes"
+    placeholder="Digite o conteúdo..."
+  >{{ detalhes }}</textarea>
+  <div class="form-actions">
+    <!-- Cancelar é só um link: faz GET / e nada é salvo -->
+    <a class="btn btn-secondary" href="{% url 'index' %}">Cancelar</a>
+    <button class="btn" type="submit">Salvar</button>
+  </div>
+</form>
+{% endblock %}
