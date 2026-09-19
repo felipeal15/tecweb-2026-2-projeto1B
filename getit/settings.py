@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 import os
 from pathlib import Path
 
+import dj_database_url
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,13 +22,28 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
+# No Render a aplicação recebe a URL do banco e o seu endereço pelo ambiente.
+# É assim que o projeto sabe se está rodando em produção ou na minha máquina.
+DATABASE_URL = os.environ.get('DATABASE_URL')
+RENDER_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-unu1_0oaw@8@vehi*-c(@2st%c+!cj_clylxst0bmbnx7&c#*q'
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY',
+    'django-insecure-unu1_0oaw@8@vehi*-c(@2st%c+!cj_clylxst0bmbnx7&c#*q',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = not DATABASE_URL
 
-ALLOWED_HOSTS = []
+# Lista de endereços pelos quais o site pode ser acessado (evita alguns ataques)
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
+CSRF_TRUSTED_ORIGINS = []
+if RENDER_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_HOSTNAME)
+    CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_HOSTNAME}')
+    # No Render o site fica atrás de um proxy que faz o HTTPS
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition
@@ -43,6 +60,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # Serve os arquivos estáticos em produção
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -74,18 +93,27 @@ WSGI_APPLICATION = 'getit.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-# PostgreSQL rodando no container Docker (pg-docker).
-# Os valores padrão são os do handout; em produção eles vêm do ambiente.
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'getit'),
-        'USER': os.environ.get('DB_USER', 'getituser'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 'getitsenha'),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
+if DATABASE_URL:
+    # Produção: o PostgreSQL do Render, configurado pela DATABASE_URL
+    DATABASES = {
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            # O banco do Render exige SSL; o container local não tem
+            ssl_require=os.environ.get('DB_SSL_REQUIRE', 'True') == 'True',
+        )
     }
-}
+else:
+    # Desenvolvimento: o PostgreSQL rodando no container Docker (pg-docker)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME', 'getit'),
+            'USER': os.environ.get('DB_USER', 'getituser'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', 'getitsenha'),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+        }
+    }
 
 
 # Password validation
@@ -123,6 +151,17 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
+# Pasta onde o collectstatic junta os arquivos estáticos para produção
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
+    },
+}
 
 
 # Email
